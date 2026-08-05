@@ -1,0 +1,46 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: vidyavana_db
+      POSTGRES_USER: vidyavana_user
+      POSTGRES_PASSWORD: post@123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  ollama:
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+
+  web:
+    build: .
+    command: daphne -b 0.0.0.0 -p 8000 config.asgi:application
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+      - ollama
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+
+volumes:
+  postgres_data:
+  ollama_data:
