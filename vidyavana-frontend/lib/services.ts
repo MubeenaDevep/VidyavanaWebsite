@@ -110,6 +110,18 @@ export type ChatMessagePayload = {
   visitor_email?: string;
 };
 
+export type ChatAudioResponse = {
+  status?: "processing" | "ready" | "error" | string;
+  url?: string | null;
+};
+
+export type ChatbotResponse = {
+  session_uuid?: string;
+  user_message?: { text?: string };
+  bot_message?: { text?: string };
+  audio?: ChatAudioResponse | null;
+};
+
 export async function getCourses(): Promise<Course[]> {
   const response = await api.get("/courses/");
   return unwrapListData<Course>(response.data);
@@ -175,9 +187,17 @@ export async function submitEnquiry(payload: EnquiryPayload) {
   return unwrapApiData(response.data);
 }
 
-export async function sendChatbotMessage(payload: ChatMessagePayload) {
+export async function sendChatbotMessage(payload: ChatMessagePayload): Promise<ChatbotResponse> {
   const response = await api.post("/chatbot/message/", payload);
-  return unwrapApiData<{ success?: boolean; data?: unknown }>(response.data);
+  const responseData = response.data as {
+    audio?: ChatAudioResponse | null;
+  };
+
+  const unwrapped = unwrapApiData<ChatbotResponse>(response.data);
+  return {
+    ...unwrapped,
+    audio: responseData.audio ?? null,
+  } as ChatbotResponse;
 }
 
 export function getCourseImage(course: Course): string | null {

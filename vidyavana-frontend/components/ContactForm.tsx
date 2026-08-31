@@ -11,13 +11,8 @@ import { submitContactMessage } from "@/lib/services";
 const contactSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters"),
   email: z.string().trim().email("Please enter a valid email address"),
-  phone: z
-    .string()
-    .trim()
-    .optional()
-    .or(z.literal("") )
-    .transform((v) => (v === undefined ? "" : v)),
-  subject: z.string().trim().optional().or(z.literal("")),
+  phone: z.string().trim(),
+  subject: z.string().trim(),
   message: z.string().trim().min(10, "Message must be at least 10 characters"),
 });
 
@@ -32,7 +27,7 @@ const defaultValues: ContactFormValues = {
 };
 
 export default function ContactForm() {
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<ContactFormValues>({
+  const { register, handleSubmit, reset, formState: { errors } } = useForm({
     resolver: zodResolver(contactSchema),
     defaultValues,
     mode: "onTouched",
@@ -40,7 +35,7 @@ export default function ContactForm() {
 
   const [submitting, setSubmitting] = useState(false);
 
-  const onSubmit = async (values: ContactFormValues) => {
+  const onSubmit = async (values: any) => {
     if (submitting) return;
     setSubmitting(true);
 

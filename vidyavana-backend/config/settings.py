@@ -183,11 +183,11 @@ CHANNEL_LAYERS = {
 }
 
 # ---------------------------------------------------------------------------
-# Ollama
+# Groq AI
 # ---------------------------------------------------------------------------
-OLLAMA_BASE_URL = env("OLLAMA_BASE_URL", default="http://127.0.0.1:11434")
-OLLAMA_MODEL = env("OLLAMA_MODEL", default="llama3.1:8b")
-OLLAMA_TIMEOUT_SECONDS = env.int("OLLAMA_TIMEOUT_SECONDS", default=30)
+GROQ_API_KEY = env("GROQ_API_KEY", default="")
+GROQ_MODEL = env("GROQ_MODEL", default="llama-3.1-8b-instant")
+GROQ_STT_MODEL = env("GROQ_STT_MODEL", default="whisper-large-v3-turbo")
 
 # ---------------------------------------------------------------------------
 # Django REST Framework

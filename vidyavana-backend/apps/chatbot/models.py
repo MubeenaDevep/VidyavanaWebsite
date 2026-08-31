@@ -42,3 +42,20 @@ class ChatMessage(TimeStampedModel):
 
     def __str__(self):
         return f"[{self.sender}] {self.text[:40]}"
+
+
+class TTSAudio(TimeStampedModel):
+    class Status(models.TextChoices):
+        PROCESSING = "processing", "Processing"
+        READY = "ready", "Ready"
+        ERROR = "error", "Error"
+
+    filename = models.CharField(max_length=255, unique=True)
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.PROCESSING)
+    error_message = models.CharField(max_length=255, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.filename} ({self.status})"

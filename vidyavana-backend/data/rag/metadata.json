@@ -1,0 +1,52 @@
+[
+  {
+    "text": "The current list of active Vidyavana courses and their descriptions is maintained in the Django Course database. Course-specific answers should use that database as the authoritative source.",
+    "source": "courses.txt",
+    "section": "Courses"
+  },
+  {
+    "text": "Current course fee information is not displayed or provided by the institute. Contact Vidyavana for the latest fee details.",
+    "source": "faq.txt",
+    "section": "Fees"
+  },
+  {
+    "text": "Course enrollment is currently not available through the website. Interested visitors can contact the institute or submit an enquiry.",
+    "source": "faq.txt",
+    "section": "Enrollment"
+  },
+  {
+    "text": "Online payment is currently not available through the website.",
+    "source": "faq.txt",
+    "section": "Payment"
+  },
+  {
+    "text": "Vidyavana Computer Educational Institute provides computer education and practical, job-oriented technical training.",
+    "source": "institute.txt",
+    "section": "Institute"
+  },
+  {
+    "text": "Courses emphasize practical implementation, hands-on lab time, and industry-oriented learning.",
+    "source": "institute.txt",
+    "section": "Training approach"
+  },
+  {
+    "text": "Vidyavana provides placement-focused training and career support. Current placement details and statistics should be confirmed with the institute.",
+    "source": "placements.txt",
+    "section": "Placement support"
+  },
+  {
+    "text": "Placement preparation may include aptitude training, technical preparation, and interview support. Ask the institute for current batch-specific details.",
+    "source": "placements.txt",
+    "section": "Preparation"
+  },
+  {
+    "text": "The chatbot should use verified Vidyavana information only. When a requested detail is not available, it should say so clearly and should not guess.",
+    "source": "policies.txt",
+    "section": "Information policy"
+  },
+  {
+    "text": "Visitors should use the website contact section or submit an enquiry for current institute details, course questions, and training information.",
+    "source": "policies.txt",
+    "section": "Contact"
+  }
+]

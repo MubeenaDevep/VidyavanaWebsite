@@ -17,6 +17,7 @@ __pycache__/
 db.sqlite3
 db.sqlite3-journal
 media/
+data/rag/
 
 # Environment Variables
 .env
@@ -88,3 +89,24 @@ tmp/
 # *.pem
 # *.key
 # *.crt
+
+# Python virtual environments
+venv/
+tts-venv/
+.env
+__pycache__/
+*.pyc
+
+# Django
+*.sqlite3
+media/
+staticfiles/
+
+# Node
+node_modules/
+.next/
+out/
+
+# Environment files
+.env
+.env.local

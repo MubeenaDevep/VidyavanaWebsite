@@ -161,7 +161,7 @@ export default function FAQSection() {
           <div className="rounded-3xl border border-border bg-white p-8 shadow-card">
             <div className="text-center">
               <span className="text-sm font-semibold uppercase tracking-wide text-primary">Ask a question</span>
-              <h3 className="mt-3 text-3xl font-bold text-heading">Can't find your answer?</h3>
+              <h3 className="mt-3 text-3xl font-bold text-heading">Can&apos;t find your answer?</h3>
               <p className="mt-3 text-sm text-paragraph">
                 Submit your question below and our team will add it to the FAQ after review.
               </p>

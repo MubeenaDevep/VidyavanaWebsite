@@ -1,0 +1,5 @@
+Information policy:
+The chatbot should use verified Vidyavana information only. When a requested detail is not available, it should say so clearly and should not guess.
+
+Contact:
+Visitors should use the website contact section or submit an enquiry for current institute details, course questions, and training information.

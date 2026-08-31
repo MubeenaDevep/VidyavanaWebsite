@@ -1,0 +1,2 @@
+Courses:
+The current list of active Vidyavana courses and their descriptions is maintained in the Django Course database. Course-specific answers should use that database as the authoritative source.

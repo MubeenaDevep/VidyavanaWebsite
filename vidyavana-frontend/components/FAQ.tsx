@@ -162,7 +162,7 @@ export default function FAQ() {
       <div className="mt-16 max-w-3xl mx-auto rounded-3xl border border-border bg-white p-8 shadow-card">
         <div className="text-center">
           <span className="text-sm font-semibold uppercase tracking-wide text-primary">Ask a question</span>
-          <h3 className="mt-3 text-3xl font-bold text-heading">Didn't find your answer?</h3>
+          <h3 className="mt-3 text-3xl font-bold text-heading">Didn&apos;t find your answer?</h3>
           <p className="mt-3 text-sm text-paragraph">
             Submit your question and our team will review it for the FAQ.
           </p>
