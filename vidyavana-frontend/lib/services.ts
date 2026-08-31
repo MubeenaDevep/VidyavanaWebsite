@@ -120,6 +120,7 @@ export type ChatbotResponse = {
   user_message?: { text?: string };
   bot_message?: { text?: string };
   audio?: ChatAudioResponse | null;
+  audio_url?: string | null;
 };
 
 export async function getCourses(): Promise<Course[]> {

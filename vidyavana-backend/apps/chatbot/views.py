@@ -152,6 +152,24 @@ class ChatMessageView(APIView):
         )
 
         # ----------------------------------------------------
+        # GENERATE TTS AUDIO
+        # ----------------------------------------------------
+        from .tts_service import generate_speech
+        
+        audio_url = None
+        try:
+            audio_path = generate_speech(bot_text, language_code)
+            # Make sure we generate a valid URL starting with MEDIA_URL
+            media_url = getattr(settings, "MEDIA_URL", "/media/")
+            if not media_url.endswith("/"):
+                media_url += "/"
+            
+            # audio_path is 'tts/filename.mp3', so we strip any leading slash just in case
+            audio_url = f"{media_url}{audio_path.lstrip('/')}"
+        except Exception:
+            logger.exception("TTS generation failed")
+
+        # ----------------------------------------------------
         # SERIALIZE CHAT RESPONSE
         # ----------------------------------------------------
 
@@ -160,6 +178,7 @@ class ChatMessageView(APIView):
                 "session_uuid": session.uuid,
                 "user_message": user_message,
                 "bot_message": bot_message,
+                "audio_url": audio_url,
             }
         )
 

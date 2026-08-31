@@ -50,3 +50,4 @@ class ChatMessageOutputSerializer(serializers.Serializer):
     session_uuid = serializers.UUIDField()
     user_message = ChatMessageSerializer()
     bot_message = ChatMessageSerializer()
+    audio_url = serializers.CharField(required=False, allow_null=True)

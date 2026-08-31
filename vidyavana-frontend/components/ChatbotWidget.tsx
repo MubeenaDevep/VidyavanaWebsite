@@ -307,7 +307,7 @@ import {
   X,
 } from "lucide-react";
 
-import { api } from "@/lib/api";
+import { api, buildMediaUrl } from "@/lib/api";
 import { getLanguages, sendChatbotMessage, type LanguageOption } from "@/lib/services";
 
 const DEFAULT_LANGS = ["EN", "KN", "TE"] as const;
@@ -316,6 +316,7 @@ type ChatMessage = {
   id: string;
   from: "bot" | "user";
   text: string;
+  audio_url?: string | null;
 };
 
 const INITIAL_MESSAGES: ChatMessage[] = [
@@ -344,6 +345,8 @@ export default function ChatbotWidget() {
     KN: false,
     TE: false,
   });
+
+  const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -453,51 +456,43 @@ export default function ChatbotWidget() {
   };
 
   const stopSpeech = () => {
-    if (typeof window !== "undefined" && "speechSynthesis" in window) {
-      window.speechSynthesis.cancel();
-      setSpeakingMessageId(null);
+    if (audioPlayerRef.current) {
+      audioPlayerRef.current.pause();
+      audioPlayerRef.current.currentTime = 0;
     }
+    setSpeakingMessageId(null);
   };
 
-  const speakBotResponse = (messageId: string, text: string, languageCode: string) => {
-    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
-
-    const normalized = (languageCode || "EN").toUpperCase();
-
+  const speakBotResponse = (messageId: string, audio_url?: string | null) => {
     if (speakingMessageId === messageId) {
       stopSpeech();
       return;
     }
+    
+    stopSpeech();
 
-    window.speechSynthesis.cancel();
-
-    // Check if this language has voice support
-    if (!voiceAvailability[normalized as keyof typeof voiceAvailability]) {
-      const languageName = { EN: "English", KN: "Kannada", TE: "Telugu" }[normalized] || normalized;
-      setError(`${languageName} voice is not available in this browser/device. Text response is shown instead.`);
-      console.warn(`${languageName} voice unavailable. Available languages: ${Object.entries(voiceAvailability).filter(([_, v]) => v).map(([k]) => k).join(", ")}`);
+    if (!audio_url) {
+      setError("Audio is not available for this message.");
       return;
     }
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    const voice = getBestVoice(languageCode);
-
-    if (voice) {
-      utterance.voice = voice;
-      console.log(`Speaking with voice: ${voice.lang} - ${voice.name}`);
-    } else {
-      console.warn(`No suitable voice found for ${languageCode}`);
+    if (!audioPlayerRef.current) {
+      audioPlayerRef.current = new Audio();
     }
-
-    utterance.lang = normalized === "KN" ? "kn-IN" : normalized === "TE" ? "te-IN" : "en-IN";
-    utterance.onstart = () => setSpeakingMessageId(messageId);
-    utterance.onend = () => setSpeakingMessageId((current) => (current === messageId ? null : current));
-    utterance.onerror = (event) => {
-      console.error(`Speech synthesis error: ${event.error}`);
+    
+    audioPlayerRef.current.src = audio_url;
+    audioPlayerRef.current.onplay = () => setSpeakingMessageId(messageId);
+    audioPlayerRef.current.onended = () => setSpeakingMessageId((current) => (current === messageId ? null : current));
+    audioPlayerRef.current.onerror = () => {
+      setError("Failed to play audio.");
       setSpeakingMessageId((current) => (current === messageId ? null : current));
     };
-
-    window.speechSynthesis.speak(utterance);
+    
+    audioPlayerRef.current.play().catch(e => {
+      console.error("Audio play error:", e);
+      setError("Failed to play audio.");
+      setSpeakingMessageId((current) => (current === messageId ? null : current));
+    });
   };
 
   const sendMessage = async (messageText: string) => {
@@ -529,8 +524,11 @@ export default function ChatbotWidget() {
       }
 
       const messageId = `bot-${Date.now()}-${Math.random()}`;
-      setMessages((current) => [...current, { id: messageId, from: "bot", text: botText }]);
-      speakBotResponse(messageId, botText, lang);
+      const audioUrl = payload?.audio_url ? buildMediaUrl(payload.audio_url) : null;
+      setMessages((current) => [...current, { id: messageId, from: "bot", text: botText, audio_url: audioUrl }]);
+      if (audioUrl) {
+        speakBotResponse(messageId, audioUrl);
+      }
     } catch (error) {
       console.error("Chatbot request failed:", error);
       setError("The assistant is temporarily unavailable. Please try again in a moment.");
@@ -716,7 +714,7 @@ formData.append(
                       ) : (
                         <button
                           type="button"
-                          onClick={() => speakBotResponse(message.id, message.text, lang)}
+                          onClick={() => speakBotResponse(message.id, message.audio_url)}
                           className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary-hover"
                           aria-label="Play assistant audio"
                         >
