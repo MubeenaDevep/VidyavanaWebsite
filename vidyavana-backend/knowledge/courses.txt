@@ -1,2 +1,32 @@
 Courses:
 The current list of active Vidyavana courses and their descriptions is maintained in the Django Course database. Course-specific answers should use that database as the authoritative source.
+
+Basic Computer Courses:
+Computer Fundamentals, Typing Master (English), Kannada Nudi, MS Word, MS Excel, MS PowerPoint, Internet Basics, Email & Online Services, and Digital Skills.
+
+Office Productivity:
+Microsoft Word, Microsoft Excel, Microsoft PowerPoint, Advanced Excel, Reports, Charts, Dashboards, and Office Documentation.
+
+Programming Courses:
+C Programming, Java, and Python.
+
+Web Development:
+HTML, CSS, JavaScript, React JS, Angular, and Responsive Web Design.
+
+Backend Development:
+Django, Django REST Framework, FastAPI, and Spring Boot.
+
+Database Technologies:
+MySQL, SQL, MongoDB, and NoSQL Databases.
+
+Data & Analytics:
+Power BI, Data Visualization, Dashboard Development, and Business Intelligence.
+
+AI & Emerging Technologies:
+Artificial Intelligence, Machine Learning, AI Tools, Prompt Engineering, and Practical AI Applications.
+
+Big Data:
+Big Data Fundamentals, Hadoop Basics, and Data Processing Concepts.
+
+Project-Based Learning:
+Live Projects, Mini Projects, Final Year Projects, Industry Use Cases, Portfolio Building, and Git & GitHub.

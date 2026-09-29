@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 import time
 import uuid
 
@@ -7,6 +8,34 @@ from django.conf import settings
 from gtts import gTTS
 
 logger = logging.getLogger("vidyavana")
+
+
+def clean_text_for_speech(text: str) -> str:
+    if not text:
+        return ""
+
+    cleaned = str(text)
+    cleaned = cleaned.replace("\r\n", "\n").replace("\r", "\n")
+
+    cleaned = re.sub(r"!\[.*?\]\(.*?\)", "", cleaned)
+    cleaned = re.sub(r"\[([^\]]+)\]\([^\)]+\)", r"\1", cleaned)
+    cleaned = re.sub(r"\[([^\]]+)\]\[[^\]]*\]", r"\1", cleaned)
+
+    cleaned = cleaned.replace("**", "").replace("__", "")
+    cleaned = cleaned.replace("#", "")
+    cleaned = cleaned.replace("`", "")
+    cleaned = cleaned.replace("_", " ")
+    cleaned = cleaned.replace("*", " ")
+
+    cleaned = re.sub(r"^\s*[-*•]\s*", "", cleaned, flags=re.MULTILINE)
+    cleaned = re.sub(r"^\s*#+\s*", "", cleaned, flags=re.MULTILINE)
+    cleaned = re.sub(r"\s+\n", "\n", cleaned)
+    cleaned = re.sub(r"\n+", " ", cleaned)
+    cleaned = re.sub(r"\s{2,}", " ", cleaned)
+    cleaned = re.sub(r"\s+([,.;:!?])", r"\1", cleaned)
+    cleaned = cleaned.strip(" -•*_")
+    return cleaned.strip()
+
 
 def generate_speech(
     text: str,
@@ -22,6 +51,10 @@ def generate_speech(
     """
     if not text or not text.strip():
         raise ValueError("Text cannot be empty.")
+
+    text = clean_text_for_speech(text)
+    if not text or not text.strip():
+        raise ValueError("Text cannot be empty after speech cleanup.")
 
     # --------------------------------------------------------
     # Normalize language

@@ -7,6 +7,7 @@ from rest_framework.test import APIClient
 from apps.courses.models import Course, CourseCategory
 
 from .groq_service import generate_chat_completion, transcribe_audio
+from .models import ChatMessage, ChatSession
 from .rag.documents import _chunk_document
 from .services import (
     _fallback_reply,
@@ -15,6 +16,7 @@ from .services import (
     detect_language,
     generate_reply,
 )
+from .tts_service import clean_text_for_speech
 
 
 class ChatbotIntentTests(TestCase):
@@ -44,6 +46,30 @@ class ChatbotIntentTests(TestCase):
 
     def test_detect_intent_for_course_enquiry(self):
         self.assertEqual(detect_intent("Tell me about Python training"), "course_enquiry")
+
+    def test_institute_answers_include_contact_cta(self):
+        reply = generate_reply("Where is Vidyavana located?", "EN")
+        self.assertIn("R.N. Street", reply["text"])
+        self.assertEqual(reply["cta"]["href"], "#contact")
+
+    def test_certificate_and_audience_are_institute_questions(self):
+        self.assertEqual(detect_intent("Do you provide certificates?"), "institute_enquiry")
+        self.assertEqual(detect_intent("Who can join?"), "institute_enquiry")
+
+    def test_fee_reply_never_exposes_course_fee(self):
+        reply = generate_reply("How much does the AI course cost?", "EN")
+        self.assertIn("not currently available", reply["text"])
+        self.assertNotIn("12000.00", reply["text"])
+
+    def test_course_follow_up_uses_session_context(self):
+        session = ChatSession.objects.create()
+        ChatMessage.objects.create(
+            session=session,
+            sender=ChatMessage.Sender.USER,
+            text="Tell me about the AI course",
+        )
+        reply = generate_reply("How long is it?", "EN", session=session)
+        self.assertIn("6 Months", reply["text"])
 
     def test_detect_language_from_kannada_script(self):
         self.assertEqual(detect_language("ನಮಸ್ಕಾರ! ನೀವು ಹೇಗಿದ್ದೀರಿ?", "EN"), "KN")
@@ -99,11 +125,6 @@ class ChatbotIntentTests(TestCase):
         self.assertIn("Python programming", context)
         self.assertNotIn("Course: AI Fundamentals", context)
 
-    def test_course_fee_uses_database_value(self):
-        reply = generate_reply("How much does the AI course cost?", "EN")
-        self.assertIn("12000.00", reply["text"])
-        self.assertNotIn("Python Programming", reply["text"])
-
     def test_general_course_question_returns_catalog(self):
         context = _get_course_context("What courses are available?", "course_enquiry")
         self.assertIn("Course: AI Fundamentals", context)
@@ -151,3 +172,24 @@ class ChatbotIntentTests(TestCase):
         response = client.post("/api/v1/chatbot/transcribe/", {}, format="multipart")
         self.assertEqual(response.status_code, 400)
         self.assertIn("required", str(response.data).lower())
+
+    def test_clean_text_for_speech_removes_markdown_formatting(self):
+        raw = "**Course Details**\n\n* Duration: 3 months\n* Mode: Offline\n\n[Learn more](https://example.com)"
+        cleaned = clean_text_for_speech(raw)
+        self.assertNotIn("**", cleaned)
+        self.assertNotIn("[Learn more]", cleaned)
+        self.assertIn("Course Details", cleaned)
+        self.assertIn("Duration: 3 months", cleaned)
+        self.assertIn("Mode: Offline", cleaned)
+
+    @patch("apps.chatbot.services.generate_chat_completion", return_value="Python is a programming language.")
+    @patch("apps.chatbot.services.retrieve_context", return_value="Python course details at Vidyavana")
+    def test_general_question_ignores_irrelevant_rag_context(
+        self,
+        mock_retrieve_context,
+        mock_generate,
+    ):
+        reply = generate_reply("What is Python?", "EN")
+        self.assertEqual(reply["text"], "Python is a programming language.")
+        mock_retrieve_context.assert_called_once()
+        self.assertEqual(mock_generate.call_args.kwargs["rag_context"], "")

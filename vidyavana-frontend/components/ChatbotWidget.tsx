@@ -308,7 +308,12 @@ import {
 } from "lucide-react";
 
 import { api, buildMediaUrl } from "@/lib/api";
-import { getLanguages, sendChatbotMessage, type LanguageOption } from "@/lib/services";
+import {
+  getLanguages,
+  sendChatbotMessage,
+  type ChatbotResponse,
+  type LanguageOption,
+} from "@/lib/services";
 
 const DEFAULT_LANGS = ["EN", "KN", "TE"] as const;
 
@@ -317,6 +322,7 @@ type ChatMessage = {
   from: "bot" | "user";
   text: string;
   audio_url?: string | null;
+  cta?: { label: string; href: string } | null;
 };
 
 const INITIAL_MESSAGES: ChatMessage[] = [
@@ -495,6 +501,35 @@ export default function ChatbotWidget() {
     });
   };
 
+  const waitForAudio = async (audio: NonNullable<ChatbotResponse["audio"]>) => {
+    if (audio.status === "ready" && audio.url) {
+      return buildMediaUrl(audio.url);
+    }
+
+    if (!audio.url) {
+      return null;
+    }
+
+    const filename = audio.url.split("/").filter(Boolean).pop();
+    if (!filename) {
+      return null;
+    }
+
+    for (let attempt = 0; attempt < 120; attempt += 1) {
+      await new Promise((resolve) => window.setTimeout(resolve, 500));
+      const response = await api.get(`/chatbot/audio/${encodeURIComponent(filename)}/`);
+      const status = response.data as { status?: string; url?: string | null };
+      if (status.status === "ready" && status.url) {
+        return buildMediaUrl(status.url);
+      }
+      if (status.status === "error") {
+        return null;
+      }
+    }
+
+    return null;
+  };
+
   const sendMessage = async (messageText: string) => {
     const trimmed = messageText.trim();
     if (!trimmed || loading) return;
@@ -524,8 +559,21 @@ export default function ChatbotWidget() {
       }
 
       const messageId = `bot-${Date.now()}-${Math.random()}`;
-      const audioUrl = payload?.audio_url ? buildMediaUrl(payload.audio_url) : null;
-      setMessages((current) => [...current, { id: messageId, from: "bot", text: botText, audio_url: audioUrl }]);
+      const audioUrl = payload?.audio
+        ? await waitForAudio(payload.audio)
+        : payload?.audio_url
+          ? buildMediaUrl(payload.audio_url)
+          : null;
+      setMessages((current) => [
+        ...current,
+        {
+          id: messageId,
+          from: "bot",
+          text: botText,
+          audio_url: audioUrl,
+          cta: payload?.cta,
+        },
+      ]);
       if (audioUrl) {
         speakBotResponse(messageId, audioUrl);
       }
@@ -701,6 +749,14 @@ formData.append(
                 message.from === "bot" ? (
                   <div key={message.id} className="max-w-[85%] rounded-xl2 rounded-tl-sm bg-section px-4 py-2.5 text-sm text-paragraph">
                     {message.text}
+                    {message.cta ? (
+                      <a
+                        href={message.cta.href}
+                        className="mt-3 inline-flex rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-primary-hover"
+                      >
+                        {message.cta.label}
+                      </a>
+                    ) : null}
                     <div className="mt-2 border-t border-border/60 pt-2">
                       {speakingMessageId === message.id ? (
                         <button

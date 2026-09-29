@@ -5,6 +5,56 @@
     "section": "Courses"
   },
   {
+    "text": "Computer Fundamentals, Typing Master (English), Kannada Nudi, MS Word, MS Excel, MS PowerPoint, Internet Basics, Email & Online Services, and Digital Skills.",
+    "source": "courses.txt",
+    "section": "Basic Computer Courses"
+  },
+  {
+    "text": "Microsoft Word, Microsoft Excel, Microsoft PowerPoint, Advanced Excel, Reports, Charts, Dashboards, and Office Documentation.",
+    "source": "courses.txt",
+    "section": "Office Productivity"
+  },
+  {
+    "text": "C Programming, Java, and Python.",
+    "source": "courses.txt",
+    "section": "Programming Courses"
+  },
+  {
+    "text": "HTML, CSS, JavaScript, React JS, Angular, and Responsive Web Design.",
+    "source": "courses.txt",
+    "section": "Web Development"
+  },
+  {
+    "text": "Django, Django REST Framework, FastAPI, and Spring Boot.",
+    "source": "courses.txt",
+    "section": "Backend Development"
+  },
+  {
+    "text": "MySQL, SQL, MongoDB, and NoSQL Databases.",
+    "source": "courses.txt",
+    "section": "Database Technologies"
+  },
+  {
+    "text": "Power BI, Data Visualization, Dashboard Development, and Business Intelligence.",
+    "source": "courses.txt",
+    "section": "Data & Analytics"
+  },
+  {
+    "text": "Artificial Intelligence, Machine Learning, AI Tools, Prompt Engineering, and Practical AI Applications.",
+    "source": "courses.txt",
+    "section": "AI & Emerging Technologies"
+  },
+  {
+    "text": "Big Data Fundamentals, Hadoop Basics, and Data Processing Concepts.",
+    "source": "courses.txt",
+    "section": "Big Data"
+  },
+  {
+    "text": "Live Projects, Mini Projects, Final Year Projects, Industry Use Cases, Portfolio Building, and Git & GitHub.",
+    "source": "courses.txt",
+    "section": "Project-Based Learning"
+  },
+  {
     "text": "Current course fee information is not displayed or provided by the institute. Contact Vidyavana for the latest fee details.",
     "source": "faq.txt",
     "section": "Fees"
@@ -20,14 +70,49 @@
     "section": "Payment"
   },
   {
-    "text": "Vidyavana Computer Educational Institute provides computer education and practical, job-oriented technical training.",
+    "text": "Vidyavana Computer Educational Center, Bellari provides practical, affordable and job-oriented computer education for beginners, students, graduates, job seekers and working professionals.",
     "source": "institute.txt",
     "section": "Institute"
   },
   {
-    "text": "Courses emphasize practical implementation, hands-on lab time, and industry-oriented learning.",
+    "text": "R.N. Street, Beside Amrutha Medical Store, Millerpet, Bellari - 583101.",
+    "source": "institute.txt",
+    "section": "Address"
+  },
+  {
+    "text": "Phone: 9480070183. Email: vidyavanably@gmail.com.",
+    "source": "institute.txt",
+    "section": "Contact"
+  },
+  {
+    "text": "Certification will be provided after completion of the course by Vidyavana Computer Educational Center.",
+    "source": "institute.txt",
+    "section": "Certification"
+  },
+  {
+    "text": "10th pass students, students who discontinued studies, PUC students, degree students, ITI students, diploma students, B.Com students, BBA/BBM students, BCA students, BE/B.Tech students, fresh graduates, job seekers, housewives and women restarting careers, and working professionals. Beginner courses do not require prior computer knowledge.",
+    "source": "institute.txt",
+    "section": "Who can join"
+  },
+  {
+    "text": "Basic Computer Courses, Office Productivity, C Programming, Java, Python, Web Development, Backend Development, Database Technologies, Data & Analytics, Artificial Intelligence, Machine Learning, AI Tools, Prompt Engineering, Practical AI Applications, Big Data, Project-Based Learning, and Git & GitHub.",
+    "source": "institute.txt",
+    "section": "Course areas"
+  },
+  {
+    "text": "Learn, practice, build projects, prepare for interviews, and get placed. The website mentions beginner-friendly learning, practical hands-on training, live projects, experienced trainers, flexible timings, weekend and weekday batches, small batch sizes, individual attention, an industry-oriented curriculum, interview preparation, and placement assistance.",
     "source": "institute.txt",
     "section": "Training approach"
+  },
+  {
+    "text": "Resume Building, Aptitude Training, Technical Interview Preparation, HR Interview Preparation, Group Discussions, Mock Interviews, Communication Skills, Corporate Etiquette, LinkedIn Profile Guidance, and Placement Assistance.",
+    "source": "institute.txt",
+    "section": "Placement and training support"
+  },
+  {
+    "text": "Current course fee details are not available in the verified information. Contact Vidyavana for the latest fee details.",
+    "source": "institute.txt",
+    "section": "Fees"
   },
   {
     "text": "Vidyavana provides placement-focused training and career support. Current placement details and statistics should be confirmed with the institute.",

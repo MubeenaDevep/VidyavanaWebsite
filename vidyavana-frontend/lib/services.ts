@@ -119,6 +119,7 @@ export type ChatbotResponse = {
   session_uuid?: string;
   user_message?: { text?: string };
   bot_message?: { text?: string };
+  cta?: { label: string; href: string } | null;
   audio?: ChatAudioResponse | null;
   audio_url?: string | null;
 };
@@ -190,14 +191,10 @@ export async function submitEnquiry(payload: EnquiryPayload) {
 
 export async function sendChatbotMessage(payload: ChatMessagePayload): Promise<ChatbotResponse> {
   const response = await api.post("/chatbot/message/", payload);
-  const responseData = response.data as {
-    audio?: ChatAudioResponse | null;
-  };
-
   const unwrapped = unwrapApiData<ChatbotResponse>(response.data);
   return {
     ...unwrapped,
-    audio: responseData.audio ?? null,
+    audio: unwrapped.audio ?? null,
   } as ChatbotResponse;
 }
 

@@ -201,8 +201,10 @@ else:
 # Groq AI
 # ---------------------------------------------------------------------------
 GROQ_API_KEY = env("GROQ_API_KEY", default="")
-GROQ_MODEL = env("GROQ_MODEL", default="llama-3.1-8b-instant")
+GROQ_MODEL = env("GROQ_MODEL", default="openai/gpt-oss-20b")
 GROQ_STT_MODEL = env("GROQ_STT_MODEL", default="whisper-large-v3-turbo")
+RAG_TOP_K = env.int("RAG_TOP_K", default=4)
+RAG_RELEVANCE_THRESHOLD = env.float("RAG_RELEVANCE_THRESHOLD", default=0.28)
 
 # ---------------------------------------------------------------------------
 # Django REST Framework
@@ -259,9 +261,11 @@ SIMPLE_JWT = {
 # ---------------------------------------------------------------------------
 # CORS
 # ---------------------------------------------------------------------------
+FRONTEND_URL = env("FRONTEND_URL", default="http://localhost:3000")
 CORS_ALLOW_ALL_ORIGINS = env.bool("CORS_ALLOW_ALL_ORIGINS", default=False)
-CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"])
+CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[FRONTEND_URL])
 CORS_ALLOW_CREDENTIALS = True
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[FRONTEND_URL])
 
 # ---------------------------------------------------------------------------
 # drf-spectacular (API documentation)

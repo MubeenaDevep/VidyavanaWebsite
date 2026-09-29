@@ -51,3 +51,5 @@ class ChatMessageOutputSerializer(serializers.Serializer):
     user_message = ChatMessageSerializer()
     bot_message = ChatMessageSerializer()
     audio_url = serializers.CharField(required=False, allow_null=True)
+    audio = serializers.DictField(required=False, allow_null=True)
+    cta = serializers.DictField(required=False, allow_null=True)

@@ -63,15 +63,15 @@ export default function Footer() {
               <ul className="mt-6 space-y-3 text-sm text-white/80">
                 <li className="flex items-start gap-2.5">
                   <MapPin size={16} className="mt-0.5 shrink-0" />
-                  <span>123 MG Road, Bengaluru, Karnataka 560001</span>
+                  <span>R.N. Street, beside Amrutha Medical Store, Millerpet, Bellari - 583101</span>
                 </li>
                 <li className="flex items-center gap-2.5">
                   <Phone size={16} className="shrink-0" />
-                  <span>+91 98765 43210</span>
+                  <span>+91 9480070183</span>
                 </li>
                 <li className="flex items-center gap-2.5">
                   <Mail size={16} className="shrink-0" />
-                  <span>hello@vidyavana.edu.in</span>
+                  <span>vidyavanably@gmail.com.</span>
                 </li>
               </ul>
 
@@ -79,7 +79,7 @@ export default function Footer() {
                 <iframe
     src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3851.3857760558735!2d76.92784527488381!3d15.137143985415301!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bb71104a4143c89%3A0xbb8aff279bd51110!2svidyavana%20computer%20educational%20centre!5e0!3m2!1sen!2sin!4v1785777807533!5m2!1sen!2sin"
     width="100%"
-    height="250"
+    height="100%"
     style={{ border: 0 }}
     loading="lazy"
     allowFullScreen
@@ -172,15 +172,15 @@ export default function Footer() {
             <ul className="mt-5 space-y-3 text-sm">
               <li className="flex items-start gap-2.5">
                 <MapPin size={16} className="mt-0.5 shrink-0" />
-                <span>123 MG Road, Bengaluru, Karnataka 560001</span>
+                <span>R.N. Street, beside Amrutha Medical Store, Millerpet, Bellari - 583101</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Phone size={16} className="shrink-0" />
-                <span>+91 98765 43210</span>
+                <span>+91 9480070183</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Mail size={16} className="shrink-0" />
-                <span>hello@vidyavana.edu.in</span>
+                <span>vidyavanably@gmail.com</span>
               </li>
             </ul>
 

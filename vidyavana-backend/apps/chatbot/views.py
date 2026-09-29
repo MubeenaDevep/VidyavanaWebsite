@@ -1,6 +1,9 @@
 import logging
+import threading
+import uuid
 
 from django.conf import settings
+from django.db import close_old_connections
 from rest_framework import mixins, viewsets
 from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework.response import Response
@@ -11,16 +14,63 @@ from apps.languages.models import Language
 from apps.notifications.views import push_notification
 
 from .groq_service import transcribe_audio
-from .models import ChatMessage, ChatSession
+from .models import ChatMessage, ChatSession, TTSAudio
 from .serializers import (
     ChatMessageInputSerializer,
     ChatMessageOutputSerializer,
     ChatSessionSerializer,
 )
 from .services import detect_language, generate_reply
+from .tts_service import clean_text_for_speech
 
 
 logger = logging.getLogger("vidyavana")
+
+
+def _audio_url(filename: str) -> str:
+    media_url = getattr(settings, "MEDIA_URL", "/media/")
+    if not media_url.endswith("/"):
+        media_url += "/"
+    return f"{media_url}tts/{filename}"
+
+
+def _generate_tts_in_background(audio_id, text: str, language_code: str, filename: str):
+    """Generate audio after the response has been returned to the client."""
+
+    from .tts_service import generate_speech
+
+    close_old_connections()
+    try:
+        audio_path = generate_speech(text, language_code, filename=filename)
+        TTSAudio.objects.filter(pk=audio_id).update(
+            status=TTSAudio.Status.READY,
+            error_message="",
+        )
+        logger.info("Background TTS ready: %s", audio_path)
+    except Exception as exc:
+        TTSAudio.objects.filter(pk=audio_id).update(
+            status=TTSAudio.Status.ERROR,
+            error_message=str(exc)[:255],
+        )
+        logger.exception("Background TTS generation failed")
+    finally:
+        close_old_connections()
+
+
+def _queue_tts(text: str, language_code: str) -> tuple[TTSAudio, str]:
+    filename = f"{uuid.uuid4().hex}.mp3"
+    audio = TTSAudio.objects.create(
+        filename=filename,
+        status=TTSAudio.Status.PROCESSING,
+    )
+    audio_url = _audio_url(filename)
+    threading.Thread(
+        target=_generate_tts_in_background,
+        args=(audio.pk, text, language_code, filename),
+        name=f"chatbot-tts-{audio.pk}",
+        daemon=True,
+    ).start()
+    return audio, audio_url
 
 
 class ChatbotThrottle(AnonRateThrottle):
@@ -152,22 +202,15 @@ class ChatMessageView(APIView):
         )
 
         # ----------------------------------------------------
-        # GENERATE TTS AUDIO
+        # QUEUE TTS AUDIO WITHOUT BLOCKING THE RESPONSE
         # ----------------------------------------------------
-        from .tts_service import generate_speech
-        
-        audio_url = None
         try:
-            audio_path = generate_speech(bot_text, language_code)
-            # Make sure we generate a valid URL starting with MEDIA_URL
-            media_url = getattr(settings, "MEDIA_URL", "/media/")
-            if not media_url.endswith("/"):
-                media_url += "/"
-            
-            # audio_path is 'tts/filename.mp3', so we strip any leading slash just in case
-            audio_url = f"{media_url}{audio_path.lstrip('/')}"
+            speech_text = clean_text_for_speech(bot_text)
+            audio, audio_url = _queue_tts(speech_text, language_code)
         except Exception:
-            logger.exception("TTS generation failed")
+            logger.exception("TTS queueing failed")
+            audio = None
+            audio_url = None
 
         # ----------------------------------------------------
         # SERIALIZE CHAT RESPONSE
@@ -178,13 +221,18 @@ class ChatMessageView(APIView):
                 "session_uuid": session.uuid,
                 "user_message": user_message,
                 "bot_message": bot_message,
-                "audio_url": audio_url,
+                "audio_url": None,
+                "audio": (
+                    {
+                        "status": audio.status,
+                        "url": audio_url,
+                    }
+                    if audio
+                    else None
+                ),
+                "cta": reply.get("cta"),
             }
         )
-
-        # ----------------------------------------------------
-        # RETURN RESPONSE
-        # ----------------------------------------------------
 
         return Response(
             {
@@ -193,6 +241,24 @@ class ChatMessageView(APIView):
             }
         )
 
+
+class ChatAudioStatusView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, filename):
+        audio = TTSAudio.objects.filter(filename=filename).first()
+        if audio is None:
+            return Response({"status": "error", "url": None}, status=404)
+
+        return Response(
+            {
+                "status": audio.status,
+                "url": _audio_url(audio.filename)
+                if audio.status == TTSAudio.Status.READY
+                else None,
+                "error": audio.error_message or None,
+            }
+        )
 
 class ChatTranscribeView(APIView):
     permission_classes = [AllowAny]

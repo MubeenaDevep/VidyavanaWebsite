@@ -26,14 +26,20 @@ def _chunk_document(document_name: str, text: str) -> list[dict]:
         if not section:
             continue
         lines = section.splitlines()
-        heading = lines[0].strip() if lines[0].endswith(":") else ""
+        heading = lines[0].strip().rstrip(":")
+        has_heading = len(lines) > 1 and (
+            lines[0].strip().endswith(":")
+            or not lines[0].strip().endswith((".", "!", "?"))
+        )
+        if not has_heading:
+            heading = ""
         content = " ".join(line.strip() for line in lines if line.strip())
         if heading:
-            content = content[len(heading):].strip()
+            content = " ".join(lines[1:]).strip()
         if content:
             chunks.append({
                 "text": content,
                 "source": document_name,
-                "section": heading.rstrip(":") or None,
+                "section": heading or None,
             })
     return chunks

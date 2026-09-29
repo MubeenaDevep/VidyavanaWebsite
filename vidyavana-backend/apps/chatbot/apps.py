@@ -6,3 +6,8 @@ class ChatbotConfig(AppConfig):
     name = "apps.chatbot"
     label = "chatbot"
     verbose_name = "Chatbot"
+
+    def ready(self):
+        from .rag.embeddings import preload_model
+
+        preload_model()

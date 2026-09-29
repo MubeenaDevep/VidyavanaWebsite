@@ -40,7 +40,7 @@ def generate_chat_completion(
 ):
     history = history or []
     client = _get_groq_client()
-    model = getattr(settings, "GROQ_MODEL", None) or os.getenv("GROQ_MODEL") or "llama-3.1-8b-instant"
+    model = getattr(settings, "GROQ_MODEL", None) or os.getenv("GROQ_MODEL") or "openai/gpt-oss-20b"
 
     messages = [{"role": "system", "content": system_prompt}]
     if rag_context:
