@@ -8,6 +8,7 @@ class ChatbotConfig(AppConfig):
     verbose_name = "Chatbot"
 
     def ready(self):
-        from .rag.embeddings import preload_model
+        # from .rag.embeddings import preload_model
 
-        preload_model()
+        # preload_model()
+        pass
