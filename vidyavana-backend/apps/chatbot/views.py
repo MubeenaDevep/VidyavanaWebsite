@@ -1,9 +1,12 @@
 import logging
 import threading
 import uuid
+from pathlib import Path
 
 from django.conf import settings
 from django.db import close_old_connections
+from django.http import FileResponse, Http404
+from django.urls import reverse
 from rest_framework import mixins, viewsets
 from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework.response import Response
@@ -28,10 +31,7 @@ logger = logging.getLogger("vidyavana")
 
 
 def _audio_url(filename: str) -> str:
-    media_url = getattr(settings, "MEDIA_URL", "/media/")
-    if not media_url.endswith("/"):
-        media_url += "/"
-    return f"{media_url}tts/{filename}"
+    return reverse("chatbot-audio-file", kwargs={"filename": filename})
 
 
 def _generate_tts_in_background(audio_id, text: str, language_code: str, filename: str):
@@ -259,6 +259,41 @@ class ChatAudioStatusView(APIView):
                 "error": audio.error_message or None,
             }
         )
+
+
+class ChatAudioFileView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, filename):
+        audio = TTSAudio.objects.filter(
+            filename=filename,
+            status=TTSAudio.Status.READY,
+        ).first()
+        if audio is None:
+            raise Http404
+
+        if (
+            not filename.endswith(".mp3")
+            or Path(filename).name != filename
+            or "/" in filename
+            or "\\" in filename
+        ):
+            raise Http404
+
+        media_root = Path(settings.MEDIA_ROOT).resolve()
+        try:
+            tts_directory = (media_root / "tts").resolve(strict=True)
+            tts_directory.relative_to(media_root)
+            audio_path = (tts_directory / filename).resolve(strict=True)
+            audio_path.relative_to(tts_directory)
+        except (OSError, ValueError):
+            raise Http404 from None
+
+        if not audio_path.is_file():
+            raise Http404
+
+        return FileResponse(audio_path.open("rb"), content_type="audio/mpeg")
+
 
 class ChatTranscribeView(APIView):
     permission_classes = [AllowAny]

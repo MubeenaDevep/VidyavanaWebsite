@@ -1,13 +1,15 @@
 from io import BytesIO
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest.mock import Mock, patch
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from rest_framework.test import APIClient
 
 from apps.courses.models import Course, CourseCategory
 
 from .groq_service import generate_chat_completion, transcribe_audio
-from .models import ChatMessage, ChatSession
+from .models import ChatMessage, ChatSession, TTSAudio
 from .rag.documents import _chunk_document
 from .services import (
     _fallback_reply,
@@ -166,6 +168,45 @@ class ChatbotIntentTests(TestCase):
 
         self.assertEqual(text, "What courses are available?")
         mock_client.audio.transcriptions.create.assert_called_once()
+
+    def test_ready_tts_audio_is_served_from_the_chatbot_endpoint(self):
+        with TemporaryDirectory() as media_root:
+            with override_settings(MEDIA_ROOT=media_root):
+                filename = "ready-audio.mp3"
+                audio_path = Path(media_root) / "tts" / filename
+                audio_path.parent.mkdir()
+                audio_path.write_bytes(b"mp3-audio")
+                TTSAudio.objects.create(
+                    filename=filename,
+                    status=TTSAudio.Status.READY,
+                )
+                client = APIClient()
+
+                status_response = client.get(f"/api/v1/chatbot/audio/{filename}/")
+                file_response = client.get(f"/api/v1/chatbot/audio-file/{filename}/")
+                try:
+                    audio_content = b"".join(file_response.streaming_content)
+                finally:
+                    file_response.close()
+
+        self.assertEqual(status_response.status_code, 200)
+        self.assertEqual(
+            status_response.data["url"],
+            f"/api/v1/chatbot/audio-file/{filename}/",
+        )
+        self.assertEqual(file_response.status_code, 200)
+        self.assertEqual(file_response["Content-Type"], "audio/mpeg")
+        self.assertEqual(audio_content, b"mp3-audio")
+
+    def test_tts_file_endpoint_rejects_non_ready_audio(self):
+        TTSAudio.objects.create(
+            filename="processing-audio.mp3",
+            status=TTSAudio.Status.PROCESSING,
+        )
+
+        response = APIClient().get("/api/v1/chatbot/audio-file/processing-audio.mp3/")
+
+        self.assertEqual(response.status_code, 404)
 
     def test_transcribe_endpoint_requires_audio(self):
         client = APIClient()
